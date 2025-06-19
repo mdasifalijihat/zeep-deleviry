@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "quote": "A posture corrector works by providing support and gentle alignment to your shoulders, back, and spine, encouraging you to maintain proper posture throughout the day.",
+    "name": "Awlad Hossin",
+    "title": "Senior Product Designer",
+    "avatar": "#005f63"           
+  },
+  {
+    "id": 2,
+    "quote": "Thanks to Profast, our parcels reach every district on time and in perfect condition. Their support team is always just a call away.",
+    "name": "Rasel Ahamed",
+    "title": "CTO",
+    "avatar": "#75ada1"
+  },
+  {
+    "id": 3,
+    "quote": "Low delivery cost and high reliability – exactly what a growing e‑commerce brand in Bangladesh needs.",
+    "name": "Nasir Uddin",
+    "title": "CEO",
+    "avatar": "#b4c5c1"
+  },
+  {
+    "id": 4,
+    "quote": "Profast’s live tracking keeps our customers happy and reduces ‘where‑is‑my‑order’ calls by 80 %.",
+    "name": "Sadia Afroz",
+    "title": "Operations Lead",
+    "avatar": "#0e726f"
+  }
+]
