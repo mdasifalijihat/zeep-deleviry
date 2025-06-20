@@ -1,8 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router";
 
 const Login = () => {
-  const {register, handleSubmit } = useForm();
+  const {register, handleSubmit, formState:{errors} } = useForm();
 
   const onSubmit = data => {
     console.log(data)
@@ -42,16 +43,23 @@ const Login = () => {
             <input
               type="password"
               id="password"
-              {...register("password")}
+              {...register("password", {required:true, minLength:6})}
+
               placeholder="Password"
               className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
             />
-            <a
+            {
+                errors.password?.type === 'required' && <p className="text-red-500">password is required </p>
+            }
+            {
+                errors.password?.type === 'minLength' && <p className="text-red-500">password must be 6 characters or longer </p>
+            }
+            <Link
               href="#"
               className="inline-block align-baseline font-bold text-sm text-gray-600 hover:text-gray-800"
             >
               Forget Password?
-            </a>
+            </Link>
           </div>
 
           <div className="mb-4">
@@ -66,9 +74,9 @@ const Login = () => {
 
         <p className="text-center text-gray-600 text-sm mb-4">
           Don't have any account?{" "}
-          <a href="#" className="font-bold text-lime-600 hover:text-lime-800">
+          <Link to={'/register'}  className="font-bold text-lime-600 hover:text-lime-800">
             Register
-          </a>
+          </Link>
         </p>
 
         <div className="relative flex py-5 items-center">
