@@ -1,24 +1,31 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useAuth from "../../../../hooks/useAuth";
 import SocialLogin from "../SocialLogin/SocialLogin";
 
 const Login = () => {
-  const {register, handleSubmit, formState:{errors} } = useForm();
-  const {signIn} =useAuth();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
 
-  const onSubmit = data => {
+  const onSubmit = (data) => {
     console.log(data);
-    signIn(data.email, data.password).then(result => {
-      console.log(result)
-      alert('user login successfully ')
-    }).catch((error) =>{
-      console.error(error)
-    } )
-  }
+    signIn(data.email, data.password)
+      .then((result) => {
+        console.log(result);
+        alert("user login successfully ");
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
-  
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
@@ -52,17 +59,18 @@ const Login = () => {
             <input
               type="password"
               id="password"
-              {...register("password", {required:true, minLength:6})}
-
+              {...register("password", { required: true, minLength: 6 })}
               placeholder="Password"
               className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
             />
-            {
-                errors.password?.type === 'required' && <p className="text-red-500">password is required </p>
-            }
-            {
-                errors.password?.type === 'minLength' && <p className="text-red-500">password must be 6 characters or longer </p>
-            }
+            {errors.password?.type === "required" && (
+              <p className="text-red-500">password is required </p>
+            )}
+            {errors.password?.type === "minLength" && (
+              <p className="text-red-500">
+                password must be 6 characters or longer{" "}
+              </p>
+            )}
             <Link
               href="#"
               className="inline-block align-baseline font-bold text-sm text-gray-600 hover:text-gray-800"
@@ -83,7 +91,10 @@ const Login = () => {
 
         <p className="text-center text-gray-600 text-sm mb-4">
           Don't have any account?{" "}
-          <Link to={'/register'}  className="font-bold text-lime-600 hover:text-lime-800">
+          <Link
+            to={"/register"}
+            className="font-bold text-lime-600 hover:text-lime-800"
+          >
             Register
           </Link>
         </p>

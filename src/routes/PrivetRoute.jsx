@@ -2,7 +2,7 @@
 import useAuth from '../hooks/useAuth';
 import { Navigate } from 'react-router';
 
-const PrivetRRoute = ({children}) => {
+const PrivetRoute = ({children}) => {
     const {user, loading} = useAuth();
     if(loading){
         return <span className="loading loading-ring loading-xl"></span>
@@ -14,4 +14,4 @@ const PrivetRRoute = ({children}) => {
     return children;
 };
 
-export default PrivetRRoute;
+export default PrivetRoute;

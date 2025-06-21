@@ -45,7 +45,7 @@ const LogoSwiper = () => (
       {/* duplicate logos array for seamless loop */}
       {[...logos, ...logos].map((logo, idx) => (
         <SwiperSlide key={idx} className="flex items-center justify-center">
-          <img cl src={logo} alt={`Client logo ${idx + 1}`} className="h-16 w-32 object-contain" />
+          <img src={logo} alt={`Client logo ${idx + 1}`} className="h-16 w-32 object-contain" />
         </SwiperSlide>
       ))}
     </Swiper>
