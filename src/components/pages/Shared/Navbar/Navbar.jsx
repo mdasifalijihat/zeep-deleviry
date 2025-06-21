@@ -20,7 +20,7 @@ const Navbar = () => {
         <NavLink to={"/"}> Home </NavLink>
       </li>
       <li>
-        <NavLink to={"/"}> Coverage </NavLink>
+        <NavLink to={"/coverage"}> Coverage </NavLink>
       </li>
       <li>
         <NavLink to={"/"}> About Us </NavLink>
@@ -48,15 +48,15 @@ const Navbar = () => {
               {navItem}
             </ul>
           </div>
-          <a className="btn btn-ghost text-xl">
+          <div className="btn btn-ghost text-xl">
             <ProFastLog></ProFastLog>
-          </a>
+          </div>
         </div>
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">{navItem}</ul>
         </div>
         <div className="navbar-end">
-          {user ?  <button onClick={hangleLogOut} className="btn">Logout</button> : <NavLink to="/login">Login</NavLink>}
+          {user ?  <button onClick={hangleLogOut} className="btn">Logout</button> : <NavLink className={'btn'} to="/login">Login</NavLink>}
         </div>
       </div>
     </div>
