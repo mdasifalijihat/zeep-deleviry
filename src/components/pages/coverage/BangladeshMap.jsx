@@ -137,7 +137,7 @@ const BangladeshMap = () => {
       {distanceKm && (
         <p className="text-center mb-4">
           🔄 মোট দূরত্ব&nbsp;
-          <span className="font-semibold">{distanceKm} কিমি</span>
+          <span className="font-semibold">{distanceKm} কিমি </span>
         </p>
       )}
 
