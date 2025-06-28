@@ -28,6 +28,13 @@ const Navbar = () => {
       <li>
         <NavLink to={"/pricing"}> Pricing </NavLink>
       </li>
+      {
+        user && <>
+         <li>
+        <NavLink to={"/dashboard"}> Dashboard </NavLink>
+      </li>
+        </>
+      }
       <li>
         <NavLink to={"/"}> Be a Rider </NavLink>
       </li>

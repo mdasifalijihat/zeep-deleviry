@@ -9,6 +9,8 @@ import Coverage from "../components/pages/coverage/Coverage";
 import About from "../components/pages/about/About";
 import PrivetRoute from "../routes/PrivetRoute";
 import Pricing from "../components/pages/Pricing/Pricing";
+import DashboardLayout from "../layouts/DashboardLayout";
+import Myparcels from "../components/pages/Dashbord/MyParcels/Myparcels";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -16,15 +18,19 @@ export const router = createBrowserRouter([
     errorElement: <p>error</p>,
     children: [
       { index: true, Component: Home },
-      { 
-        path: "/coverage", 
+      {
+        path: "/coverage",
         Component: Coverage,
-       },
+      },
       {
         path: "/pricing",
-        element: <PrivetRoute> <Pricing></Pricing></PrivetRoute>,
-        loader:()=>fetch("./warehouses.json"),
-        
+        element: (
+          <PrivetRoute>
+            {" "}
+            <Pricing></Pricing>
+          </PrivetRoute>
+        ),
+        loader: () => fetch("./warehouses.json"),
       },
       { path: "/aboutus", Component: About },
     ],
@@ -38,5 +44,20 @@ export const router = createBrowserRouter([
       { path: "login", Component: Login },
       { path: "register", Component: Register },
     ],
+  },
+
+  // dashboard
+  {
+    path: "/dashboard",
+    element: (
+      <PrivetRoute>
+        <DashboardLayout></DashboardLayout>
+      </PrivetRoute>
+    ),
+    children: [
+      {
+        path:'myParcels',
+        element:<PrivetRoute><Myparcels></Myparcels> </PrivetRoute>
+    }],
   },
 ]);
