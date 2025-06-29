@@ -11,6 +11,7 @@ import PrivetRoute from "../routes/PrivetRoute";
 import Pricing from "../components/pages/Pricing/Pricing";
 import DashboardLayout from "../layouts/DashboardLayout";
 import Myparcels from "../components/pages/Dashbord/MyParcels/Myparcels";
+import Payment from "../components/pages/Dashbord/Payment/Payment";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -58,6 +59,10 @@ export const router = createBrowserRouter([
       {
         path:'myParcels',
         element:<PrivetRoute><Myparcels></Myparcels> </PrivetRoute>
-    }],
+    },{
+      path:'payment/:id',
+      Component:Payment
+    }
+  ],
   },
 ]);

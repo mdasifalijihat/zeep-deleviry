@@ -51,7 +51,7 @@ const DashboardLayout = () => {
         <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
           {/* Sidebar content here */}
           <ProFastLog></ProFastLog>
-          <li><a>Home</a>  </li>
+          <li><NavLink>Home</NavLink>  </li>
           <li><NavLink to={'/dashboard/myParcels'}> My  Parcels </NavLink></li>
           <li><NavLink to={'/dashboard/myParcelss'}> My  Parcels </NavLink></li>
         </ul>

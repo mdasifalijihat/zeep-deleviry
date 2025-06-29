@@ -4,10 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import useAuth from "../../../../hooks/useAuth";
 import useAxiosSecure from "../../../../hooks/useAxiosSecure";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router";
 
 const MyParcels = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
+  const navigate = useNavigate();
 
   const { data: parcels = [], isLoading, refetch } = useQuery({
     queryKey: ["my-parcels", user?.email],
@@ -68,6 +70,7 @@ const MyParcels = () => {
 
   const handlePayClick = (parcel) => {
     setPayingParcel(parcel);
+    navigate(`/dashboard/payment/${parcel._id}`);
     document.getElementById("pay-modal")?.showModal();
   };
 
