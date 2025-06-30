@@ -1,13 +1,36 @@
 import React, { useState } from "react";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import Swal from "sweetalert2";
+import { useParams } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import useAxiosSecure from "../../../../hooks/useAxiosSecure";
 
 const PaymentForm = () => {
   const stripe = useStripe();
   const elements = useElements();
+  const { parcelId } = useParams();
+  const axiosSecure = useAxiosSecure();
 
   const [cardError, setCardError] = useState(""); // error state
   const [loading, setLoading] = useState(false); // optional loader
+
+  const { data: parcelInfo = {}, isPending } = useQuery({
+    queryKey: ["parcels", parcelId],
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/parcels/${parcelId}`);
+      return res.data;
+    },
+  });
+
+  if (isPending) {
+    return <span className="loading loading-spinner loading-xs"></span>;
+  }
+
+  console.log(parcelInfo);
+
+  const amount = parcelInfo.cost;
+  const amountInCents = amount * 100;
+  console.log(amountInCents);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,14 +52,37 @@ const PaymentForm = () => {
       console.log("Payment method created:", paymentMethod);
       setCardError(""); // clear error
       // optional: send paymentMethod.id to backend
-      Swal.fire({
-        title: "Payment Successful!",
-        text: `Thank you. Your payment has been processed.`,
-        icon: "success",
-        confirmButtonText: "OK",
-        timer: 2500,
-        timerProgressBar: true,
+
+      const res = await axiosSecure.post("/create-payment-intent", {
+        amount: amountInCents,
+        parcelId,
       });
+
+      const clientSecret = res.data.clientSecret;
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+          billing_details: {
+            name: "Jenny Rosen",
+          },
+        },
+      });
+      if (result.error) {
+        console.log(result.error.message);
+      } else {
+        if (result.paymentIntent.status === "succeeded") {
+          console.log("payment succeeded!");
+          Swal.fire({
+            title: "Payment Successful!",
+            text: `Thank you. Your payment has been processed.`,
+            icon: "success",
+            confirmButtonText: "OK",
+            timer: 2500,
+            timerProgressBar: true,
+          });
+        }
+      }
+      console.log("res from intent", res);
     }
     setLoading(false);
   };
@@ -50,6 +96,11 @@ const PaymentForm = () => {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Show Amount */}
+            <p className="text-lg font-semibold text-center text-gray-700">
+              Amount to Pay: <span className="text-primary">৳{amount}</span>
+            </p>
+            {/* Card input */}
             <div className="p-3 border rounded-md">
               <CardElement
                 options={{

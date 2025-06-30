@@ -60,7 +60,7 @@ export const router = createBrowserRouter([
         path:'myParcels',
         element:<PrivetRoute><Myparcels></Myparcels> </PrivetRoute>
     },{
-      path:'payment/:id',
+      path:'payment/:parcelId',
       Component:Payment
     }
   ],
