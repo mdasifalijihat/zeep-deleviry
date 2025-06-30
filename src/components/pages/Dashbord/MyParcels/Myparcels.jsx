@@ -11,7 +11,12 @@ const MyParcels = () => {
   const axiosSecure = useAxiosSecure();
   const navigate = useNavigate();
 
-  const { data: parcels = [], isLoading, refetch } = useQuery({
+  /* ─────── React‑Query: load user parcels ─────── */
+  const {
+    data: parcels = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["my-parcels", user?.email],
     queryFn: async () => {
       const res = await axiosSecure.get(`/parcels?email=${user.email}`);
@@ -22,13 +27,17 @@ const MyParcels = () => {
   const [selectedParcel, setSelectedParcel] = useState(null);
   const [payingParcel, setPayingParcel] = useState(null);
 
-  const isPaid = (status = "") => status.toLowerCase() === "paid";
+  /* helpers */
+  const isPaid = (value = "") =>
+    ["paid", "complete"].includes((value || "").toLowerCase());
 
+  /* ─────── view details modal ─────── */
   const handleViewDetails = (parcel) => {
     setSelectedParcel(parcel);
     document.getElementById("parcel-detail-modal")?.showModal();
   };
 
+  /* ─────── delete ─────── */
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -39,67 +48,64 @@ const MyParcels = () => {
       cancelButtonText: "Cancel",
     });
 
-    if (result.isConfirmed) {
-      try {
-        const res = await axiosSecure.delete(`/parcels/${id}`);
-        if (res.data.deleteCount) {
-          // Close dialogs to avoid conflicts
-          document.getElementById("parcel-detail-modal")?.close();
-          document.getElementById("pay-modal")?.close();
+    if (!result.isConfirmed) return;
 
-          await Swal.fire({
-            title: "Deleted!",
-            text: "The parcel has been deleted.",
-            icon: "success",
-            timer: 1500,
-            showConfirmButton: false,
-          });
-
-          await refetch();
-        }
-      } catch (error) {
-        console.error(error);
+    try {
+      const res = await axiosSecure.delete(`/parcels/${id}`);
+      if (res.data?.deletedCount) {
+        document.getElementById("parcel-detail-modal")?.close();
         Swal.fire({
-          title: "Error!",
-          text: "Failed to delete parcel.",
-          icon: "error",
+          title: "Deleted!",
+          text: "The parcel has been deleted.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
         });
+        await refetch();
       }
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error!", "Failed to delete parcel.", "error");
     }
   };
 
+  /* ─────── pay flow: open modal ─────── */
   const handlePayClick = (parcel) => {
     setPayingParcel(parcel);
     navigate(`/dashboard/payment/${parcel._id}`);
     document.getElementById("pay-modal")?.showModal();
   };
 
+  /* ─────── confirm pay: call backend & refresh ─────── */
   const handleConfirmPay = async () => {
     if (!payingParcel) return;
 
     try {
-      // TODO: uncomment and implement backend call
-      // await axiosSecure.patch(`/parcels/pay/${payingParcel._id}`);
+      const paymentPayload = {
+        parcelId: payingParcel._id,
+        email: user.email,
+        amount: payingParcel.cost,
+        paymentMethod: "manual", // or "cash", etc.—your choice
+        transactionId: `local-${Date.now()}`,
+      };
 
-      document.getElementById("pay-modal")?.close();
+      const res = await axiosSecure.post("/payments", paymentPayload);
+      if (res.data?.insertedId) {
+        document.getElementById("pay-modal")?.close();
+        setPayingParcel(null);
+        await refetch();
 
-      await Swal.fire({
-        title: "Success!",
-        text: "Payment completed successfully.",
-        icon: "success",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-
-      setPayingParcel(null);
-      await refetch();
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        title: "Error!",
-        text: "Failed to update payment status.",
-        icon: "error",
-      });
+        Swal.fire({
+          title: "Success!",
+          text: "Payment completed successfully.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error!", "Failed to update payment status.", "error");
     }
   };
 
@@ -116,40 +122,40 @@ const MyParcels = () => {
               <th>#</th>
               <th>Type</th>
               <th>CreatedAt</th>
-              <th>Cost(৳)</th>
+              <th>Cost (৳)</th>
               <th>Payment</th>
               <th>Actions</th>
             </tr>
           </thead>
 
           <tbody>
-            {parcels.map((parcel, idx) => (
-              <tr key={parcel._id}>
+            {parcels.map((p, idx) => (
+              <tr key={p._id}>
                 <th>{idx + 1}</th>
-                <td>{parcel.type === "document" ? "Document" : "Non‑document"}</td>
-                <td>{format(new Date(parcel.creation_date), "PPP p")}</td>
-                <td>{parcel.cost}</td>
+                <td>{p.type === "document" ? "Document" : "Non‑document"}</td>
+                <td>{format(new Date(p.creation_date), "PPP p")}</td>
+                <td>{p.cost}</td>
                 <td>
                   <span
                     className={`badge ${
-                      isPaid(parcel.status) ? "badge-success" : "badge-error"
+                      isPaid(p.payment_status) ? "badge-success" : "badge-error"
                     } badge-outline`}
                   >
-                    {isPaid(parcel.status) ? "Paid" : "Unpaid"}
+                    {isPaid(p.payment_status) ? "Paid" : "Unpaid"}
                   </span>
                 </td>
                 <td className="flex flex-wrap gap-2">
                   <button
                     className="btn btn-sm btn-info text-white"
-                    onClick={() => handleViewDetails(parcel)}
+                    onClick={() => handleViewDetails(p)}
                   >
                     View
                   </button>
 
-                  {!isPaid(parcel.status) && (
+                  {!isPaid(p.payment_status) && (
                     <button
                       className="btn btn-sm btn-success text-white"
-                      onClick={() => handlePayClick(parcel)}
+                      onClick={() => handlePayClick(p)}
                     >
                       Pay
                     </button>
@@ -157,7 +163,7 @@ const MyParcels = () => {
 
                   <button
                     className="btn btn-sm btn-error text-white"
-                    onClick={() => handleDelete(parcel._id)}
+                    onClick={() => handleDelete(p._id)}
                   >
                     Delete
                   </button>
@@ -168,19 +174,35 @@ const MyParcels = () => {
         </table>
       </div>
 
-      {/* Details Modal */}
+      {/* ─────── DETAILS MODAL ─────── */}
       <dialog id="parcel-detail-modal" className="modal">
         <div className="modal-box w-11/12 max-w-2xl">
           <h3 className="font-bold text-lg mb-4">Parcel Details</h3>
           {selectedParcel && (
             <div className="space-y-2">
-              <p><strong>Tracking ID:</strong> {selectedParcel.tracking_id}</p>
-              <p><strong>Sender:</strong> {selectedParcel.senderName}</p>
-              <p><strong>Receiver:</strong> {selectedParcel.receiverName}</p>
-              <p><strong>Address:</strong> {selectedParcel.receiverAddress}</p>
-              <p><strong>Cost:</strong> ৳{selectedParcel.cost}</p>
-              <p><strong>Status:</strong> {selectedParcel.status}</p>
-              <p><strong>CreatedAt:</strong> {format(new Date(selectedParcel.creation_date), "PPP p")}</p>
+              <p>
+                <strong>Tracking ID:</strong> {selectedParcel.tracking_id}
+              </p>
+              <p>
+                <strong>Sender:</strong> {selectedParcel.senderName}
+              </p>
+              <p>
+                <strong>Receiver:</strong> {selectedParcel.receiverName}
+              </p>
+              <p>
+                <strong>Address:</strong> {selectedParcel.receiverAddress}
+              </p>
+              <p>
+                <strong>Cost:</strong> ৳{selectedParcel.cost}
+              </p>
+              <p>
+                <strong>Payment:</strong>{" "}
+                {isPaid(selectedParcel.payment_status) ? "Paid" : "Unpaid"}
+              </p>
+              <p>
+                <strong>CreatedAt:</strong>{" "}
+                {format(new Date(selectedParcel.creation_date), "PPP p")}
+              </p>
             </div>
           )}
           <div className="modal-action">
@@ -191,7 +213,7 @@ const MyParcels = () => {
         </div>
       </dialog>
 
-      {/* Pay Confirmation Modal */}
+      {/* ─────── PAY CONFIRM MODAL ─────── */}
       <dialog id="pay-modal" className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg mb-4">Confirm Payment</h3>

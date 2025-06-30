@@ -12,6 +12,9 @@ import Pricing from "../components/pages/Pricing/Pricing";
 import DashboardLayout from "../layouts/DashboardLayout";
 import Myparcels from "../components/pages/Dashbord/MyParcels/Myparcels";
 import Payment from "../components/pages/Dashbord/Payment/Payment";
+import PaymentHistory from "../components/pages/Dashbord/paymentHistory/PaymentHistory";
+import DashboardHome from "../components/pages/Dashbord/DashboardHome/DashboardHome";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -57,12 +60,21 @@ export const router = createBrowserRouter([
     ),
     children: [
       {
-        path:'myParcels',
-        element:<PrivetRoute><Myparcels></Myparcels> </PrivetRoute>
-    },{
-      path:'payment/:parcelId',
-      Component:Payment
-    }
-  ],
+        path: "myParcels",
+        element: <Myparcels></Myparcels>,
+      },
+      {
+        path: "payment/:parcelId",
+        element: <Payment />,
+      },
+      {
+        path: "paymentHistory",
+        element: <PaymentHistory />,
+      },
+      {
+        path: "home",
+        element: <DashboardHome></DashboardHome>,
+      },
+    ],
   },
 ]);

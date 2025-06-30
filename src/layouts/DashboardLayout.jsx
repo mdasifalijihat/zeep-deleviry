@@ -2,6 +2,9 @@ import React from "react";
 import { NavLink, Outlet } from "react-router";
 import ProFastLog from "../components/pages/Shared/ProfasLogo/ProFastLog";
 
+// Import icons from react-icons
+import { FaHome, FaBox, FaHistory, FaSearchLocation, FaUserEdit } from "react-icons/fa";
+
 const DashboardLayout = () => {
   return (
     <div className="drawer lg:drawer-open">
@@ -50,10 +53,37 @@ const DashboardLayout = () => {
         ></label>
         <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
           {/* Sidebar content here */}
-          <ProFastLog></ProFastLog>
-          <li><NavLink>Home</NavLink>  </li>
-          <li><NavLink to={'/dashboard/myParcels'}> My  Parcels </NavLink></li>
-          <li><NavLink to={'/dashboard/myParcelss'}> My  Parcels </NavLink></li>
+          <ProFastLog />
+          <li>
+            <NavLink to="/dashboard/home">
+              <FaHome size={25} className="mr-2 inline" />
+              Home
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/dashboard/myParcels">
+              <FaBox size={25} className="mr-2 inline" />
+              My Parcels
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/dashboard/paymentHistory">
+              <FaHistory size={25} className="mr-2 inline" />
+              Payment History
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/dashboard/Trac">
+              <FaSearchLocation size={25} className="mr-2 inline" />
+              Trac a Package
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/dashboard/profile">
+              <FaUserEdit size={25} className="mr-2 inline" />
+              Update Profile
+            </NavLink>
+          </li>
         </ul>
       </aside>
     </div>
