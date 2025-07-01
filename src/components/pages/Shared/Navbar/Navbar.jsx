@@ -36,7 +36,7 @@ const Navbar = () => {
         </>
       }
       <li>
-        <NavLink to={"/"}> Be a Rider </NavLink>
+        <NavLink to={"/beARider"}> Be a Rider </NavLink>
       </li>
     </>
   );

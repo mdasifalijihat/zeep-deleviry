@@ -15,6 +15,10 @@ import Payment from "../components/pages/Dashbord/Payment/Payment";
 import PaymentHistory from "../components/pages/Dashbord/paymentHistory/PaymentHistory";
 import DashboardHome from "../components/pages/Dashbord/DashboardHome/DashboardHome";
 import TracParcel from "../components/pages/Dashbord/TracaPackage/TracParcel";
+import BeARider from "../components/pages/Dashbord/BeARider/BeARider";
+import ActiveRiders from "../components/pages/Dashbord/Riders/ActiveRiders";
+import PendingRiders from "../components/pages/Dashbord/Riders/PendingRiders";
+import UpdateProfile from "../components/pages/Dashbord/UpdateProfile/UpdateProfile";
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +40,14 @@ export const router = createBrowserRouter([
           </PrivetRoute>
         ),
         loader: () => fetch("./warehouses.json"),
+      },
+      {
+        path: "/beARider",
+        element: (
+          <PrivetRoute>
+            <BeARider></BeARider>{" "}
+          </PrivetRoute>
+        ),
       },
       { path: "/aboutus", Component: About },
     ],
@@ -78,8 +90,20 @@ export const router = createBrowserRouter([
       },
       {
         path: "Trac",
-        element: <TracParcel/>
+        element: <TracParcel />,
       },
+      {
+        path: "/dashboard/activeRiders",
+        element: <ActiveRiders />,
+      },
+      {
+        path: "/dashboard/pendingRiders",
+        element: <PendingRiders />,
+      },
+      {
+        path:'/dashboard/profile',
+        element:<UpdateProfile/>
+      }
     ],
   },
 ]);

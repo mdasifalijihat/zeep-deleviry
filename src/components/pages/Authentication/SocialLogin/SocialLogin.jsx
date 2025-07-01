@@ -10,18 +10,22 @@ const SocialLogin = () => {
   const axiosInstance = useAxios();
 
   const from = location.state?.from || "/";
-  const hanldeGooleLogin = () => {
+
+  const handleGoogleLogin = () => {
     googleLogin()
       .then(async (result) => {
         const user = result.user;
         console.log(result);
-        // update userinfo in the database
+
+        // Prepare user info to save in database
         const userInfo = {
-          emial: user.email,
-          role: "user", //default role
-          create_at: new Date().toISOString(),
+          email: user.email,
+          role: "user",
+          created_at: new Date().toISOString(),
           last_log_in: new Date().toISOString(),
         };
+
+        // Save user info in your backend
         const res = await axiosInstance.post("/users", userInfo);
         console.log(res.data);
 
@@ -35,7 +39,7 @@ const SocialLogin = () => {
   return (
     <div>
       <button
-        onClick={hanldeGooleLogin}
+        onClick={handleGoogleLogin} // fixed typo: 'hanldeGooleLogin' -> 'handleGoogleLogin'
         className="w-full bg-white border border-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 hover:bg-gray-50 focus:outline-none focus:shadow-outline"
       >
         <img
@@ -43,7 +47,7 @@ const SocialLogin = () => {
           alt="Google logo"
           className="h-6 w-6"
         />
-        <span>Login with google</span>
+        <span>Login with Google</span>
       </button>
     </div>
   );

@@ -84,6 +84,21 @@ const DashboardLayout = () => {
               Update Profile
             </NavLink>
           </li>
+          {/* New: Active Riders */}
+  <li>
+    <NavLink to="/dashboard/activeRiders">
+      <FaUserEdit size={25} className="mr-2 inline text-green-600" />
+      Active Riders
+    </NavLink>
+  </li>
+
+  {/* New: Pending Riders */}
+  <li>
+    <NavLink to="/dashboard/pendingRiders">
+      <FaUserEdit size={25} className="mr-2 inline text-yellow-500" />
+      Pending Riders
+    </NavLink>
+  </li>
         </ul>
       </aside>
     </div>

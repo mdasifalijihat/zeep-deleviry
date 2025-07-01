@@ -1,240 +1,162 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+ import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router";
+import Swal from "sweetalert2";
+
 import useAuth from "../../../../hooks/useAuth";
-import SocialLogin from "../SocialLogin/SocialLogin";
-import axios from "axios";
 import useAxios from "../../../../hooks/useAxios";
+import SocialLogin from "../SocialLogin/SocialLogin";
+ import axios from "axios";
 
 const Register = () => {
   const { createUser, updateUserProfile } = useAuth();
+  const axiosPublic = useAxios();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [imageUrl, setImageUrl] = useState("");
-  const axiosInstance = useAxios();
-
+   const location = useLocation();
   const from = location.state?.from || "/";
+
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
 
-  const handleImageUpload = async (e) => {
-    e.preventDefault();
-    const image = e.target.files[0];
-    console.log(image);
+  /* ───────── Helper: upload image & return URL ───────── */
+  const uploadImage = async (file) => {
     const formData = new FormData();
-    formData.append("image", image);
-    const imageUploadUrl = `https://api.imgbb.com/1/upload?key=${
-      import.meta.env.VITE_image_upload_key
+    formData.append("image", file);
+    const url = `https://api.imgbb.com/1/upload?key=${
+      import.meta.env.VITE_IMAGE_UPLOAD_KEY
     }`;
-    const res = await axios.post(imageUploadUrl, formData);
-    setImageUrl(res.data.data.url);
+    const res = await axios.post(url, formData);
+    return res.data?.data?.url;
   };
 
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
-    createUser(data.email, data.password)
-      .then(async (result) => {
-        console.log(result.user);
+  /* ───────── Main submit ───────── */
+  const onSubmit = async (data) => {
+    try {
+      // 1. upload avatar first (if any)
+      let avatarUrl = "";
+      if (data.avatar?.[0]) {
+        avatarUrl = await uploadImage(data.avatar[0]);
+      }
 
-        // update userinfo in the database
-        const userInfo = {
-          emial: data.email,
-          role: "user", //default role
-          create_at: new Date().toISOString(),
-          last_log_in: new Date().toISOString(),
-        };
+      // 2. create Firebase user
+      const { user } = await createUser(data.email, data.password);
 
-        const userRes = await axiosInstance.post("/users", userInfo);
-        console.log(userRes.data);
-
-        // update user profile in firebase
-        const userProfile = {
-          diplayName: data.name,
-          photoUrl: imageUrl,
-        };
-        updateUserProfile(userProfile)
-          .then(() => {
-            console.log("profile name pic update ");
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-
-        navigate(from);
-      })
-      .catch((error) => {
-        console.error(error);
+      // 3. save user doc to MongoDB
+      await axiosPublic.post("/users", {
+        uid: user.uid, // so you can query by uid later
+        email: data.email,
+        role: "user",
+        created_at: new Date().toISOString(),
+        last_log_in: new Date().toISOString(),
       });
+
+      // 4. update Firebase profile
+      await updateUserProfile({
+        displayName: data.name,
+        photoURL: avatarUrl,
+      });
+
+      Swal.fire("Welcome!", "Account created successfully.", "success");
+      reset();
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", err.message || "Registration failed.", "error");
+    }
   };
 
+  /* ───────── UI ───────── */
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-4xl font-bold mb-2">Create an Account</h1>
         <p className="text-gray-600 mb-6">Register with Profast</p>
 
-        {/* Avatar placeholder */}
-        <div className="flex justify-center mb-6">
-          <div className="bg-gray-200 rounded-full h-24 w-24 flex items-center justify-center text-gray-500">
-            {/* You can replace this with an actual image upload component or icon */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-12 w-12"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                clipRule="evenodd"
-              />
-              <path
-                fillRule="evenodd"
-                d="M10 13a3 3 0 100-6 3 3 0 000 6z"
-                clipRule="evenodd"
-              />{" "}
-              {/* User head */}
-              <path
-                fillRule="evenodd"
-                d="M10 17a7 7 0 00-7 7H3a8 8 0 0116 0h-1a7 7 0 00-7-7z"
-                clipRule="evenodd"
-              />{" "}
-              {/* User body */}
-              <path d="M10 11a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1z" />{" "}
-              {/* Arrow up for upload */}
-            </svg>
-          </div>
-        </div>
-
+        {/* Avatar upload */}
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
-            <label
-              htmlFor="avatar"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
+            <label className="block text-sm font-bold mb-2">
               Upload Avatar
             </label>
             <input
-              type="file"
-              id="avatar"
+               type="file"
               accept="image/*"
-              onChange={handleImageUpload}
-              className="w-full px-3 py-2 border rounded shadow-sm text-gray-700 focus:outline-none focus:shadow-outline"
+              {...register("avatar")}
+              className="file-input file-input-bordered w-full"
             />
           </div>
 
+          {/* Name */}
           <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Name
-            </label>
+            <label className="block text-sm font-bold mb-2">Name</label>
             <input
               type="text"
-              id="name"
-              placeholder="Name"
-              className={`shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                errors.name ? "border-red-500" : ""
+               {...register("name", { required: "Name is required" })}
+              className={`input input-bordered w-full ${
+                errors.name && "input-error"
               }`}
-              {...register("name", { required: "Name is required" })}
+              placeholder="Your name"
             />
             {errors.name && (
-              <p className="text-red-500 text-xs italic mt-1">
-                {errors.name.message}
-              </p>
+              <small className="text-red-500">{errors.name.message}</small>
             )}
           </div>
 
+          {/* Email */}
           <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Email
-            </label>
+            <label className="block text-sm font-bold mb-2">Email</label>
             <input
               type="email"
-              id="email"
-              placeholder="Email"
-              className={`shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                errors.email ? "border-red-500" : ""
-              }`}
-              {...register("email", {
+               {...register("email", {
                 required: "Email is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
-                },
+                pattern: { value: /^\S+@\S+\.\S+$/, message: "Invalid email" },
               })}
+              className={`input input-bordered w-full ${
+                errors.email && "input-error"
+              }`}
+              placeholder="you@example.com"
             />
             {errors.email && (
-              <p className="text-red-500 text-xs italic mt-1">
-                {errors.email.message}
-              </p>
+              <small className="text-red-500">{errors.email.message}</small>
             )}
           </div>
 
+          {/* Password */}
           <div className="mb-6">
-            <label
-              htmlFor="password"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Password
-            </label>
+            <label className="block text-sm font-bold mb-2">Password</label>
             <input
               type="password"
-              id="password"
-              placeholder="Password"
-              className={`shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline ${
-                errors.password ? "border-red-500" : ""
-              }`}
               {...register("password", {
                 required: "Password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters",
-                },
+                minLength: { value: 6, message: "At least 6 characters" },
               })}
+              className={`input input-bordered w-full ${
+                errors.password && "input-error"
+              }`}
+              placeholder="••••••"
             />
             {errors.password && (
-              <p className="text-red-500 text-xs italic mt-1">
-                {errors.password.message}
-              </p>
+              <small className="text-red-500">{errors.password.message}</small>
             )}
           </div>
 
-          <div className="mb-4">
-            <button
-              type="submit"
-              className="w-full bg-lime-400 hover:bg-lime-500 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              Register
-            </button>
-          </div>
+          <button type="submit" className="btn btn-primary w-full">
+            Register
+          </button>
         </form>
 
-        <p className="text-center text-gray-600 text-sm mb-4">
+        <p className="text-center text-sm mt-4">
           Already have an account?{" "}
-          <Link
-            to={"/login"}
-            href="#"
-            className="font-bold text-lime-600 hover:text-lime-800"
-          >
+          <Link to="/login" className="text-lime-600 font-bold">
             Login
           </Link>
         </p>
 
-        <div className="relative flex py-5 items-center">
-          <div className="flex-grow border-t border-gray-300"></div>
-          <span className="flex-shrink mx-4 text-gray-400">Or</span>
-          <div className="flex-grow border-t border-gray-300"></div>
-        </div>
-
-        <SocialLogin></SocialLogin>
+        <div className="divider">OR</div>
+        <SocialLogin />
       </div>
     </div>
   );
