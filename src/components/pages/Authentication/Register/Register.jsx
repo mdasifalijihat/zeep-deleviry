@@ -1,28 +1,73 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router";
 import useAuth from "../../../../hooks/useAuth";
 import SocialLogin from "../SocialLogin/SocialLogin";
+import axios from "axios";
+import useAxios from "../../../../hooks/useAxios";
 
 const Register = () => {
-  const { createUser } = useAuth();
+  const { createUser, updateUserProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || '/'
+  const [imageUrl, setImageUrl] = useState("");
+  const axiosInstance = useAxios();
+
+  const from = location.state?.from || "/";
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
+  const handleImageUpload = async (e) => {
+    e.preventDefault();
+    const image = e.target.files[0];
+    console.log(image);
+    const formData = new FormData();
+    formData.append("image", image);
+    const imageUploadUrl = `https://api.imgbb.com/1/upload?key=${
+      import.meta.env.VITE_image_upload_key
+    }`;
+    const res = await axios.post(imageUploadUrl, formData);
+    setImageUrl(res.data.data.url);
+  };
+
   const onSubmit = (data) => {
     console.log("Form Data:", data);
-    createUser(data.email, data.password).then(result => {
-        console.log(result.user)
-        navigate(from)
-    }).catch((error) => {
-        console.error(error)
-    })
+    createUser(data.email, data.password)
+      .then(async (result) => {
+        console.log(result.user);
+
+        // update userinfo in the database
+        const userInfo = {
+          emial: data.email,
+          role: "user", //default role
+          create_at: new Date().toISOString(),
+          last_log_in: new Date().toISOString(),
+        };
+
+        const userRes = await axiosInstance.post("/users", userInfo);
+        console.log(userRes.data);
+
+        // update user profile in firebase
+        const userProfile = {
+          diplayName: data.name,
+          photoUrl: imageUrl,
+        };
+        updateUserProfile(userProfile)
+          .then(() => {
+            console.log("profile name pic update ");
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+
+        navigate(from);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (
@@ -65,6 +110,22 @@ const Register = () => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="mb-4">
+            <label
+              htmlFor="avatar"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
+              Upload Avatar
+            </label>
+            <input
+              type="file"
+              id="avatar"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="w-full px-3 py-2 border rounded shadow-sm text-gray-700 focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
           <div className="mb-4">
             <label
               htmlFor="name"
