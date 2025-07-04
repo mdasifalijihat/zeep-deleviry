@@ -3,13 +3,19 @@ import { NavLink, Outlet } from "react-router";
 import ProFastLog from "../components/pages/Shared/ProfasLogo/ProFastLog";
 
 // Import icons from react-icons
-import { FaHome, FaBox, FaHistory, FaSearchLocation, FaUserEdit } from "react-icons/fa";
+import {
+  FaHome,
+  FaBox,
+  FaHistory,
+  FaSearchLocation,
+  FaUserEdit,
+} from "react-icons/fa";
 
 const DashboardLayout = () => {
   return (
     <div className="drawer lg:drawer-open">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-      
+
       {/* Main content area */}
       <div className="drawer-content flex flex-col">
         {/* Mobile navbar */}
@@ -84,21 +90,27 @@ const DashboardLayout = () => {
               Update Profile
             </NavLink>
           </li>
+          <li>
+            <NavLink to="/dashboard/makeAdmin">
+              <FaUserEdit size={25} className="mr-2 inline" />
+             Make Admin 
+            </NavLink>
+          </li>
           {/* New: Active Riders */}
-  <li>
-    <NavLink to="/dashboard/activeRiders">
-      <FaUserEdit size={25} className="mr-2 inline text-green-600" />
-      Active Riders
-    </NavLink>
-  </li>
+          <li>
+            <NavLink to="/dashboard/activeRiders">
+              <FaUserEdit size={25} className="mr-2 inline text-green-600" />
+              Active Riders
+            </NavLink>
+          </li>
 
-  {/* New: Pending Riders */}
-  <li>
-    <NavLink to="/dashboard/pendingRiders">
-      <FaUserEdit size={25} className="mr-2 inline text-yellow-500" />
-      Pending Riders
-    </NavLink>
-  </li>
+          {/* New: Pending Riders */}
+          <li>
+            <NavLink to="/dashboard/pendingRiders">
+              <FaUserEdit size={25} className="mr-2 inline text-yellow-500" />
+              Pending Riders
+            </NavLink>
+          </li>
         </ul>
       </aside>
     </div>

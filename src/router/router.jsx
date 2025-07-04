@@ -19,6 +19,7 @@ import BeARider from "../components/pages/Dashbord/BeARider/BeARider";
 import ActiveRiders from "../components/pages/Dashbord/Riders/ActiveRiders";
 import PendingRiders from "../components/pages/Dashbord/Riders/PendingRiders";
 import UpdateProfile from "../components/pages/Dashbord/UpdateProfile/UpdateProfile";
+import MakeAdmin from "../components/pages/Dashbord/MakeAdmin/MakeAdmin";
 
 export const router = createBrowserRouter([
   {
@@ -101,9 +102,13 @@ export const router = createBrowserRouter([
         element: <PendingRiders />,
       },
       {
-        path:'/dashboard/profile',
-        element:<UpdateProfile/>
-      }
+        path: "/dashboard/profile",
+        element: <UpdateProfile />,
+      },
+      {
+        path: "makeAdmin",
+        element: <MakeAdmin />,
+      },
     ],
   },
 ]);

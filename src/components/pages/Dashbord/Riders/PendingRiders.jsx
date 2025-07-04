@@ -20,15 +20,15 @@ const PendingRiders = () => {
     },
   });
 
-  const handleApprove = async (id) => {
-    const res = await axiosSecure.patch(`/riders/approve/${id}`);
+  const handleApprove = async (id, email) => {
+    const res = await axiosSecure.patch(`/riders/approve/${id}`, {email});
     if (res.data.modifiedCount > 0) {
       Swal.fire("Approved!", "Rider has been approved.", "success");
       refetch(); // Refresh data
     }
   };
 
-  const handleReject = async (id) => {
+  const handleReject = async (id, email) => {
     const confirm = await Swal.fire({
       title: "Are you sure?",
       text: "This will reject the rider application.",
@@ -38,7 +38,7 @@ const PendingRiders = () => {
     });
 
     if (confirm.isConfirmed) {
-      const res = await axiosSecure.delete(`/riders/${id}`);
+      const res = await axiosSecure.delete(`/riders/${id}`, email);
       if (res.data.deletedCount > 0) {
         Swal.fire("Rejected!", "Rider application has been rejected.", "success");
         refetch(); // Refresh data
@@ -104,14 +104,14 @@ const PendingRiders = () => {
                       <FaEye />
                     </button>
                     <button
-                      onClick={() => handleApprove(rider._id)}
+                      onClick={() => handleApprove(rider._id, rider.email)}
                       className="btn btn-sm btn-success tooltip"
                       data-tip="Approve"
                     >
                       <FaCheck />
                     </button>
                     <button
-                      onClick={() => handleReject(rider._id)}
+                      onClick={() => handleReject(rider._id, rider.email)}
                       className="btn btn-sm btn-error tooltip"
                       data-tip="Reject"
                     >
